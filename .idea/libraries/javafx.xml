@@ -1,0 +1,19 @@
+<component name="libraryTable">
+  <library name="javafx">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/javafx-base-12.0.1-win.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-controls-12.0.1-win.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-graphics-12.0.1-win.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-swing-12.0.1-win.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-media-12.0.1-win.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/javafx-base-12.0.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-controls-12.0.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-graphics-12.0.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-swing-12.0.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javafx-media-12.0.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
