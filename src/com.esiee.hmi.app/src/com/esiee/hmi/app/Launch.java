@@ -5,6 +5,7 @@ import com.esiee.hmi.dataaccess.WDIIndicatorsDecoder;
 import com.esiee.hmi.model.DataManager;
 import com.esiee.hmi.model.countries.Country;
 import com.esiee.hmi.model.indicators.Indicator;
+import com.esiee.hmi.view.GlobalPane;
 import com.esiee.hmi.view.MapPane;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -103,7 +104,7 @@ public final class Launch extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        Scene scene = new Scene(new MapPane());
+        Scene scene = new Scene(new GlobalPane());
 
         primaryStage.setTitle("World Development Indicator Viewer");
         primaryStage.setMaximized(true);
