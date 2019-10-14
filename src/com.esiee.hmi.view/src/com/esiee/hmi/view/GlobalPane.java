@@ -8,10 +8,17 @@ import javafx.scene.layout.StackPane;
 
 public class GlobalPane extends SplitPane {
 
+    private boolean isMenuClosed;
+    private IndicatorPane menu;
+
     public GlobalPane(){
+        this.isMenuClosed = false;
+        this.menu = new IndicatorPane();
         AnchorPane anchorPane = new AnchorPane();
-        Button menuButton = new Button("Menu");
         MapPane map = new MapPane();
+
+        Button menuButton = new Button("Menu");
+        menuButton.setOnMouseClicked(event -> closeOrOpenMenu());
 
         AnchorPane.setLeftAnchor(menuButton, 20d);
 
@@ -24,7 +31,17 @@ public class GlobalPane extends SplitPane {
 
         anchorPane.getChildren().addAll(map, menuButton);
 
-        this.getItems().addAll(new IndicatorPane(), anchorPane);
+        this.getItems().addAll(this.menu, anchorPane);
+    }
+
+    private void closeOrOpenMenu(){
+        if (this.isMenuClosed){
+            this.setDividerPositions(this.menu.getMaxWidth());
+            this.isMenuClosed = false;
+        }else {
+            this.setDividerPositions(this.menu.getMinWidth());
+            this.isMenuClosed = true;
+        }
     }
 
 }

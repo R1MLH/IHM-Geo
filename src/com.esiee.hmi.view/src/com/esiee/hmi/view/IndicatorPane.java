@@ -12,6 +12,7 @@ public class IndicatorPane extends TitledPane {
 
     public IndicatorPane(){
         this.setMaxWidth(300);
+        this.setMinWidth(0);
 //        VBox content = new VBox();
 //        content.getChildren().add(new Label("Java Swing Tutorial"));
 //        content.getChildren().add(new Label("JavaFx Tutorial"));
