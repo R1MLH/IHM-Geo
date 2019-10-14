@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/src/com.esiee.hmi.app/com.esiee.hmi.app.iml" filepath="$PROJECT_DIR$/src/com.esiee.hmi.app/com.esiee.hmi.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/com.esiee.hmi.dataaccess/com.esiee.hmi.dataaccess.iml" filepath="$PROJECT_DIR$/src/com.esiee.hmi.dataaccess/com.esiee.hmi.dataaccess.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/com.esiee.hmi.model/com.esiee.hmi.model.iml" filepath="$PROJECT_DIR$/src/com.esiee.hmi.model/com.esiee.hmi.model.iml" />
-      <module fileurl="file://$PROJECT_DIR$/src/com.esiee.hmi.training/com.esiee.hmi.training.iml" filepath="$PROJECT_DIR$/src/com.esiee.hmi.training/com.esiee.hmi.training.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/com.esiee.hmi.view/com.esiee.hmi.view.iml" filepath="$PROJECT_DIR$/src/com.esiee.hmi.view/com.esiee.hmi.view.iml" />
     </modules>
   </component>
