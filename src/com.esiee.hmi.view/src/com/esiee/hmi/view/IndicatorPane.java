@@ -2,31 +2,23 @@ package com.esiee.hmi.view;
 
 import com.esiee.hmi.model.DataManager;
 import com.esiee.hmi.model.indicators.Indicator;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-// https://stackoverflow.com/questions/16235171/how-to-insert-treeview-into-accordion-using-javafx
-// http://tutorials.jenkov.com/javafx/accordion.html
-// https://docs.oracle.com/javafx/2/ui_controls/tree-view.htm
 
-public class IndicatorPane extends VBox {
+public class IndicatorPane extends Accordion {
 
     public IndicatorPane(){
-        this.setMaxWidth(300);
-        this.setPrefWidth(300);
+        this.setMaxWidth(550);
+        this.setPrefWidth(550);
         this.setMinWidth(0);
-//        VBox content = new VBox();
-//        content.getChildren().add(new Label("Java Swing Tutorial"));
-//        content.getChildren().add(new Label("JavaFx Tutorial"));
-//        content.getChildren().add(new Label("Java IO Tutorial"));
         Map<String, Map<String, List<Indicator>>> indicatorsMap = DataManager.INSTANCE.getIndicatorsMap();
         List<TitledPane> listOfPanes = new ArrayList<>();
 
@@ -58,6 +50,6 @@ public class IndicatorPane extends VBox {
             listOfPanes.add(titledPane);
         }
 
-        this.getChildren().addAll(listOfPanes);
+        this.getPanes().addAll(listOfPanes);
     }
 }

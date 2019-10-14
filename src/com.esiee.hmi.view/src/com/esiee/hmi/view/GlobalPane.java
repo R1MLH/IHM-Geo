@@ -3,8 +3,6 @@ package com.esiee.hmi.view;
 import javafx.scene.control.Button;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 
 public class GlobalPane extends SplitPane {
 
