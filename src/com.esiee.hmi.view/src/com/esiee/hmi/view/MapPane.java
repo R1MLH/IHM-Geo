@@ -17,6 +17,7 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Screen;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class MapPane extends Pane {
@@ -24,7 +25,9 @@ public class MapPane extends Pane {
     double baseY ;
     Scale dynamicZoom;
     Translate dynamicPosition;
+    private HashMap<javafx.scene.shape.Polygon,Country> polyMap;
     public MapPane() {
+        polyMap = new HashMap<javafx.scene.shape.Polygon, Country>();
 
         // Transformations
         Translate centerTranslate = new Translate();
@@ -55,6 +58,7 @@ public class MapPane extends Pane {
 
                 }
                 tamponPolygon.setFill(Color.GREEN);
+                polyMap.put(tamponPolygon,c);
                 this.getChildren().add(tamponPolygon);
             }
 
