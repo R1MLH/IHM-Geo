@@ -75,6 +75,12 @@ public class IndicatorPane extends Accordion {
     }
 
     private void paint(Object newValue) {
+        MapPane mapPane = this.parent.getMapPane();
+        List<Country> countryList = DataManager.INSTANCE.getCountries();
+        for(Country country : countryList)
+            for(Polygon polygon : mapPane.getCountryMap().get(country))
+                polygon.setFill(Color.GRAY);
+
         TreeItem indicatorItem = (TreeItem) newValue;
         String indicatorName = (String) indicatorItem.getValue();
         Optional<Indicator> optionalIndicator = DataManager.INSTANCE.getIndicators().filter(indicator -> indicator.getName().equals(indicatorName)).findFirst();
@@ -84,7 +90,6 @@ public class IndicatorPane extends Accordion {
         if (optionalIndicator.isPresent()) {
             try {
                 indicatorDataList = WDIIndicatorDataDecoder.decode(optionalIndicator.get().getCode());
-//                System.out.println(indicatorDataList);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -93,19 +98,18 @@ public class IndicatorPane extends Accordion {
                 return;
 
             for(IndicatorData indicatorData : indicatorDataList) {
+                Optional<Country> optionalCountry = DataManager.INSTANCE.getCountryByCode(indicatorData.getCountryCode());
+                Country c;
+                if (optionalCountry.isPresent()) {
+                    c = optionalCountry.get();
+                }else{
+                    continue;
+                }
+
                 double max = 0.0;
                 double min = Double.MAX_VALUE;
-                System.out.println(indicatorData.getCountryCode());
-                Optional<Country> optionalCountry = DataManager.INSTANCE.getCountryByCode(indicatorData.getCountryCode());
-                Country c = null;
-                if (optionalCountry.isPresent())
-                    c = optionalCountry.get();
-                else
-                    return;
-
                 for (double data : indicatorData.getValues()){
                     if(!Double.isNaN(data)){
-//                    System.out.println(data);
                         if(data > max)
                             max = data;
                         else if(min > data)
@@ -124,10 +128,7 @@ public class IndicatorPane extends Accordion {
 
                 for (double data : indicatorData.getValues())
                     if(!Double.isNaN(data)){
-                        MapPane mapPane = this.parent.getMapPane();
-//                        System.out.println(mapPane);
-                        for(Node node : mapPane.getChildren()){
-                                javafx.scene.shape.Polygon polygon = (javafx.scene.shape.Polygon) node;
+                        for(javafx.scene.shape.Polygon polygon : mapPane.getCountryMap().get(c)){
                                 if(data < deuxiemecatLimit)
                                     polygon.setFill(listOfColors.get("LIME"));
                                 else if(data < troisiemecatLimit)
