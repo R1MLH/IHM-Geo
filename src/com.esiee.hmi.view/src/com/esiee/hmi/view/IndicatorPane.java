@@ -12,15 +12,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 public class IndicatorPane extends Accordion {
+
+    private HashMap<String, Color> listOfColors;
 
     public IndicatorPane(){
         this.setMaxWidth(550);
@@ -28,6 +27,14 @@ public class IndicatorPane extends Accordion {
         this.setMinWidth(0);
         Map<String, Map<String, List<Indicator>>> indicatorsMap = DataManager.INSTANCE.getIndicatorsMap();
         List<TitledPane> listOfPanes = new ArrayList<>();
+        this.listOfColors = new HashMap<>();
+        this.listOfColors.put("LIME", Color.LIME);
+        this.listOfColors.put("LIMEGREEN", Color.LIMEGREEN);
+        this.listOfColors.put("DARKGREEN", Color.DARKGREEN);
+        this.listOfColors.put("NAVAJOWHITE", Color.NAVAJOWHITE);
+        this.listOfColors.put("TOMATO", Color.TOMATO);
+        this.listOfColors.put("ORANGE", Color.ORANGERED);
+        this.listOfColors.put("RED", Color.RED);
 
         for(String topic : indicatorsMap.keySet()){
             VBox vBoxLayout = new VBox();
@@ -79,21 +86,58 @@ public class IndicatorPane extends Accordion {
                 e.printStackTrace();
             }
 
-            for(IndicatorData indicatorData : indicatorDataList){
-                for(double data : indicatorData.getValues())
-                    System.out.println(data);
-            }
+            for(IndicatorData indicatorData : indicatorDataList) {
+                double max = 0.0;
+                double min = Double.MAX_VALUE;
+                for (double data : indicatorData.getValues()){
+                    if(!Double.isNaN(data)){
+//                    System.out.println(data);
+                        if(data > max)
+                            max = data;
+                        else if(min > data)
+                            min = data;
+                    }
+                }
 
-//            for (Country c : DataManager.INSTANCE.getCountries()) {
-//                List<Polygon> poly = c.getGeometry().getPolygons();
-//                for (Polygon polygon : poly) {
-//                    javafx.scene.shape.Polygon tamponPolygon = new javafx.scene.shape.Polygon();
-//                    for (GeoPoint geos : polygon.points) {
-//                        tamponPolygon.getPoints().addAll(geos.lon, geos.lat);
-//                    }
-//                    tamponPolygon.setFill(Color.RED);
-//                }
-//            }
+                double plage = max - min;
+//                double premierecatLimit = 0.0;
+                double deuxiemecatLimit = (1.0/7) * plage;
+                double troisiemecatLimit = (2.0/7) * plage;
+                double quatriemecatLimit = (3.0/7) * plage;
+                double cinquiemecatLimit = (4.0/7) * plage;
+                double sixiemecatLimit = (5.0/7) * plage;
+                double septiemecatLimit = (6.0/7) * plage;
+
+                for (double data : indicatorData.getValues())
+                    if(!Double.isNaN(data)){
+//                    System.out.println(data);
+                        for (Country c : DataManager.INSTANCE.getCountries()) {
+                            List<Polygon> poly = c.getGeometry().getPolygons();
+                            for (Polygon polygon : poly) {
+                                javafx.scene.shape.Polygon tamponPolygon = new javafx.scene.shape.Polygon();
+                                for (GeoPoint geos : polygon.points) {
+                                    tamponPolygon.getPoints().addAll(geos.lon, geos.lat);
+                                }
+//                            System.out.println("OK");
+                                if(data < deuxiemecatLimit)
+//                                System.out.println("LIME");
+                                    tamponPolygon.setFill(listOfColors.get("LIME"));
+                                else if(data < troisiemecatLimit)
+                                    tamponPolygon.setFill(listOfColors.get("LIMEGREEN"));
+                                else if(data < quatriemecatLimit)
+                                    tamponPolygon.setFill(listOfColors.get("DARKGREEN"));
+                                else if(data < cinquiemecatLimit)
+                                    tamponPolygon.setFill(listOfColors.get("NAVAJOWHITE"));
+                                else if(data < sixiemecatLimit)
+                                    tamponPolygon.setFill(listOfColors.get("TOMATO"));
+                                else if(data < septiemecatLimit)
+                                    tamponPolygon.setFill(listOfColors.get("ORANGE"));
+                                else
+                                    tamponPolygon.setFill(listOfColors.get("RED"));
+                            }
+                        }
+                    }
+            }
         }
     }
 }
