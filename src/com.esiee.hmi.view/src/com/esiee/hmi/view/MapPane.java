@@ -128,7 +128,7 @@ public class MapPane extends Pane {
                 dynamicPosition.setX(newX+dynamicPosition.getX());
 
                 dynamicPosition.setY(newY+dynamicPosition.getY());
-                System.out.println(dynamicPosition.getX() + " "+dynamicPosition.getY());
+//                System.out.println(dynamicPosition.getX() + " "+dynamicPosition.getY());
                 baseX = mouseEvent.getSceneX();
                 baseY = mouseEvent.getSceneY();
             }
