@@ -5,6 +5,7 @@ import com.esiee.hmi.model.countries.Country;
 import com.esiee.hmi.model.countries.GeoPoint;
 import com.esiee.hmi.model.countries.Polygon;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.input.MouseEvent;
@@ -17,6 +18,7 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Screen;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,9 +28,10 @@ public class MapPane extends Pane {
     Scale dynamicZoom;
     Translate dynamicPosition;
     private HashMap<javafx.scene.shape.Polygon,Country> polyMap;
+    private HashMap<Country,List<javafx.scene.shape.Polygon>> countryMap;
     public MapPane() {
         polyMap = new HashMap<javafx.scene.shape.Polygon, Country>();
-
+        countryMap = new HashMap<Country,List<javafx.scene.shape.Polygon>>();
         // Transformations
         Translate centerTranslate = new Translate();
         centerTranslate.xProperty().bind(this.widthProperty().divide(2));
@@ -49,6 +52,8 @@ public class MapPane extends Pane {
         for (Country c: countries
              ) {
             List<Polygon> poly = c.getGeometry().getPolygons();
+            List<javafx.scene.shape.Polygon> polygonsMappedToACountry = new ArrayList<javafx.scene.shape.Polygon>();
+            countryMap.put(c,polygonsMappedToACountry);
             for (Polygon polygon: poly
                  ) {
                 javafx.scene.shape.Polygon tamponPolygon = new javafx.scene.shape.Polygon();
@@ -59,7 +64,19 @@ public class MapPane extends Pane {
                 }
                 tamponPolygon.setFill(Color.GREEN);
                 polyMap.put(tamponPolygon,c);
+                polygonsMappedToACountry.add(tamponPolygon);
                 this.getChildren().add(tamponPolygon);
+
+                tamponPolygon.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent mouseEvent) {
+                        Country co = polyMap.get(tamponPolygon);
+                        List<javafx.scene.shape.Polygon> liste = countryMap.get(co);
+                        for (javafx.scene.shape.Polygon polygon: liste) {
+                            polygon.setFill(Color.RED);
+                        }
+                    }
+                });
             }
 
         }
