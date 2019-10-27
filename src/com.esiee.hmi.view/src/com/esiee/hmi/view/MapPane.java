@@ -29,6 +29,7 @@ public class MapPane extends Pane {
     Translate dynamicPosition;
     private HashMap<javafx.scene.shape.Polygon,Country> polyMap;
     private HashMap<Country,List<javafx.scene.shape.Polygon>> countryMap;
+
     public MapPane() {
         polyMap = new HashMap<javafx.scene.shape.Polygon, Country>();
         countryMap = new HashMap<Country,List<javafx.scene.shape.Polygon>>();
@@ -62,7 +63,7 @@ public class MapPane extends Pane {
                     tamponPolygon.getPoints().addAll(geos.lon,geos.lat);
 
                 }
-                tamponPolygon.setFill(Color.GREEN);
+                tamponPolygon.setFill(Color.GRAY);
                 polyMap.put(tamponPolygon,c);
                 polygonsMappedToACountry.add(tamponPolygon);
                 this.getChildren().add(tamponPolygon);
@@ -127,13 +128,18 @@ public class MapPane extends Pane {
                 dynamicPosition.setX(newX+dynamicPosition.getX());
 
                 dynamicPosition.setY(newY+dynamicPosition.getY());
-                System.out.println(dynamicPosition.getX() + " "+dynamicPosition.getY());
+//                System.out.println(dynamicPosition.getX() + " "+dynamicPosition.getY());
                 baseX = mouseEvent.getSceneX();
                 baseY = mouseEvent.getSceneY();
             }
         });
     }
 
+    public HashMap<javafx.scene.shape.Polygon, Country> getPolyMap() {
+        return polyMap;
+    }
 
-
+    public HashMap<Country, List<javafx.scene.shape.Polygon>> getCountryMap() {
+        return countryMap;
+    }
 }

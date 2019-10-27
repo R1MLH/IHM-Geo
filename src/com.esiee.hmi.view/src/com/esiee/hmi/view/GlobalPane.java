@@ -8,27 +8,30 @@ public class GlobalPane extends SplitPane {
 
     private boolean isMenuClosed;
     private IndicatorPane menu;
+    private MapPane mapPane;
+    private LegendPane legendPane;
 
     public GlobalPane(){
         this.isMenuClosed = false;
-        this.menu = new IndicatorPane();
+        this.menu = new IndicatorPane(this);
+        this.mapPane = new MapPane();
+        this.legendPane = new LegendPane(this);
         AnchorPane anchorPane = new AnchorPane();
-        MapPane map = new MapPane();
 
         Button menuButton = new Button("Menu");
         menuButton.setOnMouseClicked(event -> closeOrOpenMenu());
-
         AnchorPane.setLeftAnchor(menuButton, 20d);
-
         this.heightProperty().addListener((observable, oldValue, newValue) -> AnchorPane.setTopAnchor(menuButton, newValue.doubleValue()/2));
 
-        AnchorPane.setLeftAnchor(map, 0d);
-        AnchorPane.setRightAnchor(map, 0d);
-        AnchorPane.setTopAnchor(map, 0d);
-        AnchorPane.setBottomAnchor(map, 0d);
+        AnchorPane.setLeftAnchor(this.mapPane, 0d);
+        AnchorPane.setRightAnchor(this.mapPane, 0d);
+        AnchorPane.setTopAnchor(this.mapPane, 0d);
+        AnchorPane.setBottomAnchor(this.mapPane, 0d);
 
-        anchorPane.getChildren().addAll(map, menuButton);
+        AnchorPane.setBottomAnchor(this.legendPane, 0d);
+        this.mapPane.widthProperty().addListener((observable, oldValue, newValue) -> AnchorPane.setLeftAnchor(legendPane, newValue.doubleValue()/2-200f));
 
+        anchorPane.getChildren().addAll(this.mapPane, menuButton, this.legendPane);
         this.getItems().addAll(this.menu, anchorPane);
     }
 
@@ -42,4 +45,15 @@ public class GlobalPane extends SplitPane {
         }
     }
 
+    MapPane getMapPane(){
+        return this.mapPane;
+    }
+
+    IndicatorPane getMenu() {
+        return menu;
+    }
+
+    LegendPane getLegendPane() {
+        return legendPane;
+    }
 }
