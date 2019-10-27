@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.util.*;
@@ -18,26 +19,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-public class IndicatorPane extends Accordion {
+class IndicatorPane extends Accordion {
 
-    private HashMap<String, Color> listOfColors;
+    private LinkedHashMap<Double, Color> catLimit;
     private GlobalPane parent;
 
-    public IndicatorPane(GlobalPane parent){
+    IndicatorPane(GlobalPane parent){
         this.setMaxWidth(550);
         this.setPrefWidth(550);
         this.setMinWidth(0);
         this.parent = parent;
         Map<String, Map<String, List<Indicator>>> indicatorsMap = DataManager.INSTANCE.getIndicatorsMap();
         List<TitledPane> listOfPanes = new ArrayList<>();
-        this.listOfColors = new HashMap<>();
-        this.listOfColors.put("LIME", Color.LIME);
-        this.listOfColors.put("LIMEGREEN", Color.LIMEGREEN);
-        this.listOfColors.put("DARKGREEN", Color.DARKGREEN);
-        this.listOfColors.put("NAVAJOWHITE", Color.NAVAJOWHITE);
-        this.listOfColors.put("TOMATO", Color.TOMATO);
-        this.listOfColors.put("ORANGE", Color.ORANGERED);
-        this.listOfColors.put("RED", Color.RED);
+        this.catLimit = null;
 
         for(String topic : indicatorsMap.keySet()){
             VBox vBoxLayout = new VBox();
@@ -97,55 +91,55 @@ public class IndicatorPane extends Accordion {
             if(indicatorDataList == null)
                 return;
 
+            double max = 0.0;
+            double min = Double.MAX_VALUE;
+            double sum = 0.0;
+            double numberOfSamples = 0.0;
             for(IndicatorData indicatorData : indicatorDataList) {
-                Optional<Country> optionalCountry = DataManager.INSTANCE.getCountryByCode(indicatorData.getCountryCode());
-                Country c;
-                if (optionalCountry.isPresent()) {
-                    c = optionalCountry.get();
-                }else{
-                    continue;
-                }
-
-                double max = 0.0;
-                double min = Double.MAX_VALUE;
-                for (double data : indicatorData.getValues()){
+                for (double data : indicatorData.getValues())
                     if(!Double.isNaN(data)){
                         if(data > max)
                             max = data;
                         else if(min > data)
                             min = data;
-                    }
-                }
-
-                double plage = max - min;
-//                double premierecatLimit = 0.0;
-                double deuxiemecatLimit = (1.0/7) * plage;
-                double troisiemecatLimit = (2.0/7) * plage;
-                double quatriemecatLimit = (3.0/7) * plage;
-                double cinquiemecatLimit = (4.0/7) * plage;
-                double sixiemecatLimit = (5.0/7) * plage;
-                double septiemecatLimit = (6.0/7) * plage;
-
-                for (double data : indicatorData.getValues())
-                    if(!Double.isNaN(data)){
-                        for(javafx.scene.shape.Polygon polygon : mapPane.getCountryMap().get(c)){
-                                if(data < deuxiemecatLimit)
-                                    polygon.setFill(listOfColors.get("LIME"));
-                                else if(data < troisiemecatLimit)
-                                    polygon.setFill(listOfColors.get("LIMEGREEN"));
-                                else if(data < quatriemecatLimit)
-                                    polygon.setFill(listOfColors.get("DARKGREEN"));
-                                else if(data < cinquiemecatLimit)
-                                    polygon.setFill(listOfColors.get("NAVAJOWHITE"));
-                                else if(data < sixiemecatLimit)
-                                    polygon.setFill(listOfColors.get("TOMATO"));
-                                else if(data < septiemecatLimit)
-                                    polygon.setFill(listOfColors.get("ORANGE"));
-                                else
-                                    polygon.setFill(listOfColors.get("RED"));
-                        }
+                        sum += data;
+                        numberOfSamples++;
                     }
             }
+            double mean = sum / numberOfSamples;
+
+            double plage = max - min;
+            this.catLimit = new LinkedHashMap<>();
+            this.catLimit.put(min + (1.0/7) * plage, Color.LIME);
+            this.catLimit.put(min + (2.0/7) * plage, Color.LIMEGREEN);
+            this.catLimit.put(min + (3.0/7) * plage, Color.DARKGREEN);
+            this.catLimit.put(min + (4.0/7) * plage, Color.NAVAJOWHITE);
+            this.catLimit.put(min + (5.0/7) * plage, Color.TOMATO);
+            this.catLimit.put(min + (6.0/7) * plage, Color.ORANGERED);
+            this.catLimit.put(min + (7.0/7) * plage, Color.RED);
+
+            for(IndicatorData indicatorData : indicatorDataList) {
+                Optional<Country> optionalCountry = DataManager.INSTANCE.getCountryByCode(indicatorData.getCountryCode());
+                Country c;
+                if (optionalCountry.isPresent())
+                    c = optionalCountry.get();
+                else
+                    continue;
+
+                for (double data : indicatorData.getValues())
+                    if(!Double.isNaN(data))
+                        for(javafx.scene.shape.Polygon polygon : mapPane.getCountryMap().get(c))
+                            for(double key : this.catLimit.keySet())
+                                if(data < key){
+                                    polygon.setFill(this.catLimit.get(key));
+                                    break;
+                                }
+            }
+            this.parent.getLegendPane().refreshLegend(max, min, sum, numberOfSamples, mean);
         }
+    }
+
+    LinkedHashMap<Double, Color> getCatLimit() {
+        return catLimit;
     }
 }

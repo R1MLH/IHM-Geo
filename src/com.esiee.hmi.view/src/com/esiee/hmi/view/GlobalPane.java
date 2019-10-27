@@ -3,22 +3,20 @@ package com.esiee.hmi.view;
 import javafx.scene.control.Button;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-
-import java.util.Map;
 
 public class GlobalPane extends SplitPane {
 
     private boolean isMenuClosed;
     private IndicatorPane menu;
     private MapPane mapPane;
+    private LegendPane legendPane;
 
     public GlobalPane(){
         this.isMenuClosed = false;
         this.menu = new IndicatorPane(this);
         this.mapPane = new MapPane();
+        this.legendPane = new LegendPane(this);
         AnchorPane anchorPane = new AnchorPane();
-        LegendPane legendPane = new LegendPane();
 
         Button menuButton = new Button("Menu");
         menuButton.setOnMouseClicked(event -> closeOrOpenMenu());
@@ -30,10 +28,10 @@ public class GlobalPane extends SplitPane {
         AnchorPane.setTopAnchor(this.mapPane, 0d);
         AnchorPane.setBottomAnchor(this.mapPane, 0d);
 
-        AnchorPane.setBottomAnchor(legendPane, 10d);
-        this.mapPane.widthProperty().addListener((observable, oldValue, newValue) -> AnchorPane.setRightAnchor(legendPane, newValue.doubleValue()/2));
+        AnchorPane.setBottomAnchor(this.legendPane, 0d);
+        this.mapPane.widthProperty().addListener((observable, oldValue, newValue) -> AnchorPane.setLeftAnchor(legendPane, newValue.doubleValue()/2-200f));
 
-        anchorPane.getChildren().addAll(this.mapPane, menuButton, legendPane);
+        anchorPane.getChildren().addAll(this.mapPane, menuButton, this.legendPane);
         this.getItems().addAll(this.menu, anchorPane);
     }
 
@@ -47,8 +45,15 @@ public class GlobalPane extends SplitPane {
         }
     }
 
-    public MapPane getMapPane(){
+    MapPane getMapPane(){
         return this.mapPane;
     }
 
+    IndicatorPane getMenu() {
+        return menu;
+    }
+
+    LegendPane getLegendPane() {
+        return legendPane;
+    }
 }
