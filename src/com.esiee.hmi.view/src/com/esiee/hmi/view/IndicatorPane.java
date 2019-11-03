@@ -101,6 +101,11 @@ class IndicatorPane extends Accordion {
             else
                 stats = this.computeStats(indicatorDataList);
 
+            if(stats == null){
+                this.parent.getLegendPane().printMessage("No value for this year. Please try another one");
+                return;
+            }
+
             this.setCategories(stats.get("max"), stats.get("min"));
 
             for(IndicatorData indicatorData : indicatorDataList) {
@@ -118,6 +123,8 @@ class IndicatorPane extends Accordion {
             }
             this.parent.getLegendPane().refreshLegend(stats.get("max"), stats.get("min"), stats.get("sum"), stats.get("numberOfSamples"), stats.get("mean"));
         }
+        else
+            System.out.println("OptionnalIndicator not present");
     }
 
     private void fillCountriesColorForYear(IndicatorData indicatorData, MapPane mapPane, Country c, int year){
@@ -153,7 +160,7 @@ class IndicatorPane extends Accordion {
                 if(!Double.isNaN(data)){
                     if(data > max)
                         max = data;
-                    else if(min > data)
+                    if(min > data)
                         min = data;
                     sum += data;
                     numberOfSamples++;
@@ -161,14 +168,18 @@ class IndicatorPane extends Accordion {
         }
         double mean = sum / numberOfSamples;
 
-        HashMap<String, Double> result = new HashMap<>();
-        result.put("max", max);
-        result.put("min", min);
-        result.put("sum", sum);
-        result.put("numberOfSamples", (double) numberOfSamples);
-        result.put("mean", mean);
+        if(Double.isNaN(mean))
+            return null;
+        else{
+            HashMap<String, Double> result = new HashMap<>();
+            result.put("max", max);
+            result.put("min", min);
+            result.put("sum", sum);
+            result.put("numberOfSamples", (double) numberOfSamples);
+            result.put("mean", mean);
 
-        return result;
+            return result;
+        }
     }
 
     private HashMap<String, Double> computeStatsForYear(List<IndicatorData> indicatorDataList, int year){
@@ -182,22 +193,25 @@ class IndicatorPane extends Accordion {
             if(!Double.isNaN(data)){
                 if(data > max)
                     max = data;
-                else if(min > data)
+                if(min > data)
                     min = data;
                 sum += data;
                 numberOfSamples++;
             }
         }
         double mean = sum / numberOfSamples;
+        if(Double.isNaN(mean))
+            return null;
+        else{
+            HashMap<String, Double> result = new HashMap<>();
+            result.put("max", max);
+            result.put("min", min);
+            result.put("sum", sum);
+            result.put("numberOfSamples", (double) numberOfSamples);
+            result.put("mean", mean);
 
-        HashMap<String, Double> result = new HashMap<>();
-        result.put("max", max);
-        result.put("min", min);
-        result.put("sum", sum);
-        result.put("numberOfSamples", (double) numberOfSamples);
-        result.put("mean", mean);
-
-        return result;
+            return result;
+        }
     }
 
     private void resetColor(MapPane mapPane, List<Country> countryList){
