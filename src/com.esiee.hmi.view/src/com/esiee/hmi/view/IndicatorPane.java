@@ -23,8 +23,10 @@ class IndicatorPane extends Accordion {
 
     private LinkedHashMap<Double, Color> catLimit;
     private GlobalPane parent;
+    private Slider slider;
+    private CheckBox dateFilter;
 
-    IndicatorPane(GlobalPane parent){
+    IndicatorPane(GlobalPane parent, Slider slider, CheckBox dateFilter){
         this.setMaxWidth(550);
         this.setPrefWidth(550);
         this.setMinWidth(0);
@@ -32,6 +34,8 @@ class IndicatorPane extends Accordion {
         Map<String, Map<String, List<Indicator>>> indicatorsMap = DataManager.INSTANCE.getIndicatorsMap();
         List<TitledPane> listOfPanes = new ArrayList<>();
         this.catLimit = null;
+        this.slider = slider;
+        this.dateFilter = dateFilter;
 
         for(String topic : indicatorsMap.keySet()){
             VBox vBoxLayout = new VBox();
@@ -68,14 +72,12 @@ class IndicatorPane extends Accordion {
         this.getPanes().addAll(listOfPanes);
     }
 
-    private void paint(Object newValue) {
+    private void paint(Object indicatorObj) {
         MapPane mapPane = this.parent.getMapPane();
         List<Country> countryList = DataManager.INSTANCE.getCountries();
-        for(Country country : countryList)
-            for(Polygon polygon : mapPane.getCountryMap().get(country))
-                polygon.setFill(Color.GRAY);
+        this.resetColor(mapPane, countryList);
 
-        TreeItem indicatorItem = (TreeItem) newValue;
+        TreeItem indicatorItem = (TreeItem) indicatorObj;
         String indicatorName = (String) indicatorItem.getValue();
         Optional<Indicator> optionalIndicator = DataManager.INSTANCE.getIndicators().filter(indicator -> indicator.getName().equals(indicatorName)).findFirst();
 //        optionalIndicator.ifPresent(indicator -> System.out.println(((Indicator) indicator).getName()));
@@ -88,35 +90,18 @@ class IndicatorPane extends Accordion {
                 e.printStackTrace();
             }
 
-            if(indicatorDataList == null)
+            if(indicatorDataList == null){
+                this.parent.getLegendPane().printMessage("No value for this year. Please try another one");
                 return;
-
-            double max = 0.0;
-            double min = Double.MAX_VALUE;
-            double sum = 0.0;
-            double numberOfSamples = 0.0;
-            for(IndicatorData indicatorData : indicatorDataList) {
-                for (double data : indicatorData.getValues())
-                    if(!Double.isNaN(data)){
-                        if(data > max)
-                            max = data;
-                        else if(min > data)
-                            min = data;
-                        sum += data;
-                        numberOfSamples++;
-                    }
             }
-            double mean = sum / numberOfSamples;
 
-            double plage = max - min;
-            this.catLimit = new LinkedHashMap<>();
-            this.catLimit.put(min + (1.0/7) * plage, Color.LIME);
-            this.catLimit.put(min + (2.0/7) * plage, Color.LIMEGREEN);
-            this.catLimit.put(min + (3.0/7) * plage, Color.DARKGREEN);
-            this.catLimit.put(min + (4.0/7) * plage, Color.NAVAJOWHITE);
-            this.catLimit.put(min + (5.0/7) * plage, Color.TOMATO);
-            this.catLimit.put(min + (6.0/7) * plage, Color.ORANGERED);
-            this.catLimit.put(min + (7.0/7) * plage, Color.RED);
+            HashMap<String, Double> stats;
+            if(this.dateFilter.isSelected())
+                stats = this.computeStatsForYear(indicatorDataList, (int) this.slider.getValue());
+            else
+                stats = this.computeStats(indicatorDataList);
+
+            this.setCategories(stats.get("max"), stats.get("min"));
 
             for(IndicatorData indicatorData : indicatorDataList) {
                 Optional<Country> optionalCountry = DataManager.INSTANCE.getCountryByCode(indicatorData.getCountryCode());
@@ -126,17 +111,111 @@ class IndicatorPane extends Accordion {
                 else
                     continue;
 
-                for (double data : indicatorData.getValues())
-                    if(!Double.isNaN(data))
-                        for(javafx.scene.shape.Polygon polygon : mapPane.getCountryMap().get(c))
-                            for(double key : this.catLimit.keySet())
-                                if(data < key){
-                                    polygon.setFill(this.catLimit.get(key));
-                                    break;
-                                }
+                if(this.dateFilter.isSelected())
+                    this.fillCountriesColorForYear(indicatorData, mapPane, c, (int) this.slider.getValue());
+                else
+                    this.fillCountriesColor(indicatorData, mapPane, c);
             }
-            this.parent.getLegendPane().refreshLegend(max, min, sum, numberOfSamples, mean);
+            this.parent.getLegendPane().refreshLegend(stats.get("max"), stats.get("min"), stats.get("sum"), stats.get("numberOfSamples"), stats.get("mean"));
         }
+    }
+
+    private void fillCountriesColorForYear(IndicatorData indicatorData, MapPane mapPane, Country c, int year){
+        double data = indicatorData.getValueForYear(year);
+        if(!Double.isNaN(data))
+            for(javafx.scene.shape.Polygon polygon : mapPane.getCountryMap().get(c))
+                for(double key : this.catLimit.keySet())
+                    if(data < key){
+                        polygon.setFill(this.catLimit.get(key));
+                        break;
+                    }
+    }
+
+    private void fillCountriesColor(IndicatorData indicatorData, MapPane mapPane, Country c){
+        for (double data : indicatorData.getValues())
+            if(!Double.isNaN(data))
+                for(javafx.scene.shape.Polygon polygon : mapPane.getCountryMap().get(c))
+                    for(double key : this.catLimit.keySet())
+                        if(data < key){
+                            polygon.setFill(this.catLimit.get(key));
+                            break;
+                        }
+    }
+
+    private HashMap<String, Double> computeStats(List<IndicatorData> indicatorDataList){
+        double max = 0.0;
+        double min = Double.MAX_VALUE;
+        double sum = 0.0;
+        int numberOfSamples = 0;
+
+        for(IndicatorData indicatorData : indicatorDataList) {
+            for (double data : indicatorData.getValues())
+                if(!Double.isNaN(data)){
+                    if(data > max)
+                        max = data;
+                    else if(min > data)
+                        min = data;
+                    sum += data;
+                    numberOfSamples++;
+                }
+        }
+        double mean = sum / numberOfSamples;
+
+        HashMap<String, Double> result = new HashMap<>();
+        result.put("max", max);
+        result.put("min", min);
+        result.put("sum", sum);
+        result.put("numberOfSamples", (double) numberOfSamples);
+        result.put("mean", mean);
+
+        return result;
+    }
+
+    private HashMap<String, Double> computeStatsForYear(List<IndicatorData> indicatorDataList, int year){
+        double max = 0.0;
+        double min = Double.MAX_VALUE;
+        double sum = 0.0;
+        int numberOfSamples = 0;
+
+        for(IndicatorData indicatorData : indicatorDataList) {
+            double data = indicatorData.getValueForYear(year);
+            if(!Double.isNaN(data)){
+                if(data > max)
+                    max = data;
+                else if(min > data)
+                    min = data;
+                sum += data;
+                numberOfSamples++;
+            }
+        }
+        double mean = sum / numberOfSamples;
+
+        HashMap<String, Double> result = new HashMap<>();
+        result.put("max", max);
+        result.put("min", min);
+        result.put("sum", sum);
+        result.put("numberOfSamples", (double) numberOfSamples);
+        result.put("mean", mean);
+
+        return result;
+    }
+
+    private void resetColor(MapPane mapPane, List<Country> countryList){
+        for(Country country : countryList)
+            for(Polygon polygon : mapPane.getCountryMap().get(country))
+                polygon.setFill(Color.GRAY);
+    }
+
+    private void setCategories(double max, double min){
+        double plage = max - min;
+        this.catLimit = new LinkedHashMap<>();
+        this.catLimit.put(min + (1.0/7) * plage, Color.LIME);
+        this.catLimit.put(min + (2.0/7) * plage, Color.LIMEGREEN);
+        this.catLimit.put(min + (3.0/7) * plage, Color.DARKGREEN);
+        this.catLimit.put(min + (4.0/7) * plage, Color.NAVAJOWHITE);
+        this.catLimit.put(min + (5.0/7) * plage, Color.TOMATO);
+        this.catLimit.put(min + (6.0/7) * plage, Color.ORANGERED);
+        this.catLimit.put(min + (7.0/7) * plage, Color.RED);
     }
 
     LinkedHashMap<Double, Color> getCatLimit() {
